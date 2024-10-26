@@ -1,29 +1,5 @@
 base = 10
 
-class Formula:
-    pass
-
-class R:
-    pass
-
-class Formula:
-    def __init__(self):
-        pass
-    def app(self, n: int, m: int) -> R:
-        print("app ERROR")
-    def __add__(self, other: Formula) -> Formula:
-        return ADD(self,other)
-    def __abs__(self) -> Formula:
-        return ABS(self)
-    def __neg__(self) -> Formula:
-        return NEG(self)
-    def __sub__(self, other: Formula) -> Formula:
-        return SUB(self,other)
-    def __mul__(self, other: Formula) -> Formula:
-        return MUL(self, other)
-    def __truediv__(self, other: Formula) -> Formula:
-        return TRUEDIV(self,other)
-
 class Digits:
     pass
 class Digits:
@@ -130,8 +106,8 @@ class Digits:
                 (z, cpt) = z+a
         return (z, self.n+other.n)
     def __truediv__(self, other: Digits) -> Digits:
-        r = Digits(self.n, True, self.tab)
-        p = Digits(other.n, True, other.tab)
+        r = Digits(self.n, True, self.tab.copy())
+        p = Digits(other.n, True, other.tab.copy())
         z = Digits(self.n, self.isPositif==other.isPositif, [0]*self.n)
         for i in range(0,self.n):
             while r>=p:
@@ -211,14 +187,14 @@ class Exponent:
     def __lt__(self, other: Exponent) -> bool:
         return self.digits<other.digits
 
-class R(Formula):
+class R:
+    pass
+class R:
     def __init__(self, mantissa: Mantissa, exponent: Exponent):
         self.mantissa = mantissa
         self.exponent = exponent
     def copy(self) -> R:
         return R(self.mantissa.copy(), self.exponent.copy())
-    def app(self, n: int, m: int) -> R:
-        return self.copy()
     def __str__(self):
         return ("" if self.mantissa.digits.isPositif else "-") \
                 + f"{self.mantissa.digits.tab[0]}" \
@@ -242,24 +218,8 @@ class R(Formula):
                 + [0]*(n-self.mantissa.digits.n)
         self.mantissa.digits.n = n
         return self
-
-def normalize(x: R, y: R) -> (R, R):
-    while x.exponent < y.exponent:
-        x.exponent.increase()
-        x.mantissa.rshift(0)
-    while y.exponent < x.exponent:
-        y.exponent.increase()
-        y.mantissa.rshift(0)
-    return (x, y)
-
-class ADD(Formula):
-    def __init__(self, x: Formula, y: Formula):
-        self.x = x
-        self.y = y
-    def app(self, n: int, m: int) -> R:
-        x = self.x.app(n,m)
-        y = self.y.app(n,m)
-        (x, y) = normalize(x, y)
+    def __add__(self, other: R) -> R:
+        (x, y) = normalize(self, other)
         (digits, cpt) = x.mantissa.digits+y.mantissa.digits
         mantissa = Mantissa(digits.n, digits.isPositif, digits.tab)
         exponent = x.exponent
@@ -267,33 +227,19 @@ class ADD(Formula):
             mantissa.digits.rshift(1)
             exponent.increase()
         return R(mantissa, exponent).trim().cut(n)
-
-class NEG(Formula):
-    def __init__(self, x: Formula):
-        self.x = x
-    def app(self, n: int, m: int) -> R:
-        x = self.x.app(n,m)
+    def __neg__(self) -> R:
+        x = self
         mantissa = Mantissa(x.mantissa.digits.n, \
                 not x.mantissa.digits.isPositif, \
                 x.mantissa.digits.tab \
                 )
         exponent = x.exponent
         return R(mantissa, exponent)
-
-class SUB(Formula):
-    def __init__(self, x: Formula, y: Formula):
-        self.x = x
-        self.y = y
-    def app(self, n: int, m: int) -> R:
-        return (self.x+(-self.y)).app(n,m)
-
-class MUL(Formula):
-    def __init__(self, x: Formula, y: Formula):
-        self.x = x
-        self.y = y
-    def app(self, n: int, m: int) -> R:
-        x = self.x.app(n,m)
-        y = self.y.app(n,m)
+    def __sub__(self, other: R) -> R:
+        return self+(-other)
+    def __mul__(self, other: R) -> R:
+        x = self
+        y = other
         (digits, k) = x.mantissa.digits*y.mantissa.digits
         mantissa = Mantissa(digits.n, digits.isPositif, digits.tab)
         (digits, cpt) = x.exponent.digits+y.exponent.digits
@@ -302,102 +248,99 @@ class MUL(Formula):
 #            exponent.increase()
         exponent.increase()
         return R(mantissa, exponent).trim().cut(n)
-
-class TRUEDIV(Formula):
-    def __init__(self, x: Formula, y: Formula):
-        self.x = x
-        self.y = y
-    def app(self, n: int, m: int) -> R:
-        x = self.x.app(n,m)
-        y = self.y.app(n,m)
+    def __truediv__(self, other: R) -> R:
+        x = self
+        y = other
         digits = x.mantissa.digits/y.mantissa.digits
         mantissa = Mantissa(digits.n, digits.isPositif, digits.tab)
         (digits, cpt) = x.exponent.digits-y.exponent.digits
         exponent = Exponent(digits.n, digits.isPositif, digits.tab)
         return R(mantissa, exponent).trim().cut(n)
-
-class ZERO(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [0]*n),\
-                Exponent(m, True, [0]*m) \
-                )
-
-class ONE(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [(1 if i==0 else 0) for i in range(n)]),\
-                Exponent(m, True, [0]*m)\
-                )
-
-class TWO(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [(2 if i==0 else 0) for i in range(n)]),\
-                Exponent(m, True, [0]*m) \
-                )
-
-class THREE(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [(3 if i==0 else 0) for i in range(n)]),\
-                Exponent(m, True, [0]*m) \
-                )
-
-class FOUR(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [(4 if i==0 else 0) for i in range(n)]),\
-                Exponent(m, True, [0]*m) \
-                )
-
-class EPS(Formula):
-    def app(self, n: int, m: int) -> R:
-        return R(\
-                Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
-                Exponent(m, False, [base-1]*m) \
-                )
-
-class ABS(Formula):
-    def __init__(self, x: Formula):
-        self.x = x
-    def app(self, n: int, m: int) -> R:
-        y = self.x.app(n,m)
-        y.mantissa.digits.isPositif = True
-        return y
-
-
-class SQRT(Formula):
-    def __init__(self, x: Formula):
-        self.x = x
-    class y_n:
-        def __init__(self, y_0: R):
-            self.y_0 = y_0
-        def lim(self, n: int, m: int) -> R:
-            y_nm1 = self.y_0
-            y_n = ((y_nm1 + (self.y_0/y_nm1)) / TWO()).app(n,m)
-            while abs(y_n-y_nm1).app(n,m).mantissa>EPS().app(n,m).mantissa:
+    def __abs__(self) -> R:
+        x = self
+        x.mantissa.digits.isPositif = True
+        return x
+    def SQRT(self) -> R:
+        def lim() -> R:
+            n = self.mantissa.digits.n
+            m = self.exponent.digits.n
+            y_nm1 = self
+            y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
+            while abs(y_n-y_nm1).mantissa>EPS(n,m).mantissa:
                 y_nm1 = y_n
-                y_n = ((y_nm1 + (self.y_0/y_nm1)) / TWO()).app(n,m)
+                y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
             return y_n
-    def app(self, n: int, m: int) -> R:
-        return SQRT.y_n(self.x.app(n,m)).lim(n,m)
-
-class PI(Formula):
-    class p_n:
-        def lim(self, n: int, m: int) -> R:
-            P_n = (TWO()*FOUR()).app(n,m)
-            p_n = (SQRT(TWO())*FOUR()).app(n,m)
-            while abs(P_n-p_n).app(n,m).mantissa>EPS().app(n,m).mantissa:
-                P_n = (TWO()*(P_n*p_n)/(P_n+p_n)).app(n,m)
-                p_n = SQRT(p_n*P_n).app(n,m)
+        return lim()
+    def PI(n: int,m: int) -> R:
+        def lim() -> R:
+            P_n = TWO(n,m)*FOUR(n,m)
+            p_n = TWO(n,m).SQRT()*FOUR(n,m)
+            while abs(P_n-p_n).mantissa>EPS(n,m).mantissa:
+                P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
+                p_n = (p_n*P_n).SQRT()
             return p_n
-    def app(self, n: int, m: int) -> R:
-        return (PI.p_n().lim(n,m)/TWO()).app(n,m)
+        return lim()/TWO(n,m)
 
-n = 10
+#class PI:
+#    class p_n:
+#        def lim(self, n: int, m: int) -> R:
+#            P_n = (TWO()*FOUR()).app(n,m)
+#            p_n = (SQRT(TWO())*FOUR()).app(n,m)
+#            while abs(P_n-p_n).app(n,m).mantissa>EPS().app(n,m).mantissa:
+#                P_n = (TWO()*(P_n*p_n)/(P_n+p_n)).app(n,m)
+#                p_n = SQRT(p_n*P_n).app(n,m)
+#            return p_n
+#    def app(self, n: int, m: int) -> R:
+#        return (PI.p_n().lim(n,m)/TWO()).app(n,m)
+
+
+def normalize(self: R, other: R) -> (R, R):
+    x = self.copy()
+    y = other.copy()
+    while x.exponent < y.exponent:
+        x.exponent.increase()
+        x.mantissa.rshift(0)
+    while y.exponent < x.exponent:
+        y.exponent.increase()
+        y.mantissa.rshift(0)
+    return (x, y)
+
+def ZERO(n: int, m: int) -> R:
+    return R(Mantissa(n, True, [0]*n), Exponent(m, True, [0]*m))
+
+def ONE(n: int, m: int) -> R:
+    return R(\
+            Mantissa(n, True, [(1 if i==0 else 0) for i in range(n)]),\
+            Exponent(m, True, [0]*m)\
+            )
+
+def TWO(n: int, m: int) -> R:
+    return R(\
+            Mantissa(n, True, [(2 if i==0 else 0) for i in range(n)]),\
+            Exponent(m, True, [0]*m) \
+            )
+
+def THREE(n: int, m: int) -> R:
+    return R(\
+            Mantissa(n, True, [(3 if i==0 else 0) for i in range(n)]),\
+            Exponent(m, True, [0]*m) \
+            )
+
+def FOUR(n: int, m: int) -> R:
+    return R(\
+            Mantissa(n, True, [(4 if i==0 else 0) for i in range(n)]),\
+            Exponent(m, True, [0]*m) \
+            )
+
+def EPS(n: int, m: int) -> R:
+    return R(\
+            Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
+            Exponent(m, False, [base-1]*m) \
+            )
+
+n = 50
 m = 1
 print(n,m)
-print((FOUR()*FOUR()).app(n,m))
-print(SQRT(TWO()).app(n,m))
-print(PI().app(n,m))
+print((FOUR(n,m)*FOUR(n,m)))
+print((TWO(n,m).SQRT()))
+print(R.PI(n,m))
