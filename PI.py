@@ -331,7 +331,7 @@ def PI(n: int,m: int) -> R:
         return p_n
     return lim()/TWO(n,m)
 
-n = 100
+n = 10
 m = 2
 print(n,m)
 print(TWO(n,m).SQRT())
