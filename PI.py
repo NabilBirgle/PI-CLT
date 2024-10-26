@@ -271,28 +271,6 @@ class R:
                 y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
             return y_n
         return lim()
-    def PI(n: int,m: int) -> R:
-        def lim() -> R:
-            P_n = TWO(n,m)*FOUR(n,m)
-            p_n = TWO(n,m).SQRT()*FOUR(n,m)
-            while abs(P_n-p_n).mantissa>EPS(n,m).mantissa:
-                P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
-                p_n = (p_n*P_n).SQRT()
-            return p_n
-        return lim()/TWO(n,m)
-
-#class PI:
-#    class p_n:
-#        def lim(self, n: int, m: int) -> R:
-#            P_n = (TWO()*FOUR()).app(n,m)
-#            p_n = (SQRT(TWO())*FOUR()).app(n,m)
-#            while abs(P_n-p_n).app(n,m).mantissa>EPS().app(n,m).mantissa:
-#                P_n = (TWO()*(P_n*p_n)/(P_n+p_n)).app(n,m)
-#                p_n = SQRT(p_n*P_n).app(n,m)
-#            return p_n
-#    def app(self, n: int, m: int) -> R:
-#        return (PI.p_n().lim(n,m)/TWO()).app(n,m)
-
 
 def normalize(self: R, other: R) -> (R, R):
     x = self.copy()
@@ -338,9 +316,18 @@ def EPS(n: int, m: int) -> R:
             Exponent(m, False, [base-1]*m) \
             )
 
-n = 50
+def PI(n: int,m: int) -> R:
+    def lim() -> R:
+        P_n = TWO(n,m)*FOUR(n,m)
+        p_n = TWO(n,m).SQRT()*FOUR(n,m)
+        while abs(P_n-p_n).mantissa>EPS(n,m).mantissa:
+            P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
+            p_n = (p_n*P_n).SQRT()
+        return p_n
+    return lim()/TWO(n,m)
+
+n = 10
 m = 1
 print(n,m)
-print((FOUR(n,m)*FOUR(n,m)))
-print((TWO(n,m).SQRT()))
-print(R.PI(n,m))
+print(TWO(n,m).SQRT())
+print(PI(n,m))
