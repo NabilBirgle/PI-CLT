@@ -272,7 +272,7 @@ class R:
             m = self.exponent.digits.n
             y_nm1 = self
             y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
-            while abs(y_n-y_nm1).mantissa>EPS(n,m).mantissa:
+            while abs(y_n-y_nm1)>EPS(n,m):
                 y_nm1 = y_n
                 y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
             return y_n
@@ -319,21 +319,21 @@ def FOUR(n: int, m: int) -> R:
 def EPS(n: int, m: int) -> R:
     return R(\
             Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
-            Exponent(m, False, [base-1]*m) \
+            Exponent(m, True, [0]*m) \
             )
 
 def PI(n: int,m: int) -> R:
     def lim() -> R:
         P_n = TWO(n,m)*FOUR(n,m)
         p_n = TWO(n,m).SQRT()*FOUR(n,m)
-        while abs(P_n/TWO(n,m)-p_n/TWO(n,m)).mantissa>EPS(n,m).mantissa:
+        while abs(P_n-p_n)>EPS(n,m):
             P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
             p_n = (p_n*P_n).SQRT()
         return p_n
     return lim()/TWO(n,m)
 
-n = 10
-m = 1
+n = 100
+m = 2
 print(n,m)
 print(TWO(n,m).SQRT())
 print(PI(n,m))
