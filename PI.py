@@ -79,7 +79,9 @@ class Digits:
                         cpt = True
                     else:
                         cpt = False
-                return (z, False)
+                if z.tab == [0]*self.n:
+                    z.isPositif = True
+                return (z, cpt)
             else:
                 z = Digits(self.n, other.isPositif, [0]*self.n)
                 cpt = False
@@ -91,9 +93,11 @@ class Digits:
                         cpt = True
                     else:
                         cpt = False
-                return (z, False)
+                if z.tab == [0]*self.n:
+                    z.isPositif = True
+                return (z, cpt)
     def __sub__(self, other: Digits) -> (Digits, bool):
-        return self+Digits(other.n, not other.isPositif, other.tab)
+        return self+(-other)
     def __mul__(self, other: Digits) -> (Digits, int):
         z = Digits(self.n+other.n, self.isPositif==other.isPositif, [0]*(self.n+other.n))
         for i in range(self.n-1,-1,-1):
@@ -113,7 +117,11 @@ class Digits:
             while r>=p:
                 (r, cpt) = r-p
                 z.tab[i] += 1
-            p.rshift(0)
+#            p.rshift(0)
+            p.tab.insert(0,0)
+            p.n+=1
+            r.tab.append(0)
+            r.n+=1
         return z
 
 class Mantissa:
@@ -226,7 +234,7 @@ class R:
         if cpt:
             mantissa.digits.rshift(1)
             exponent.increase()
-        return R(mantissa, exponent).trim().cut(n)
+        return R(mantissa, exponent).trim().cut(mantissa.digits.n)
     def __neg__(self) -> R:
         x = self
         mantissa = Mantissa(x.mantissa.digits.n, \
@@ -244,10 +252,8 @@ class R:
         mantissa = Mantissa(digits.n, digits.isPositif, digits.tab)
         (digits, cpt) = x.exponent.digits+y.exponent.digits
         exponent = Exponent(digits.n, digits.isPositif, digits.tab)
-#        for i in range(1,k):
-#            exponent.increase()
         exponent.increase()
-        return R(mantissa, exponent).trim().cut(n)
+        return R(mantissa, exponent).trim().cut(x.mantissa.digits.n)
     def __truediv__(self, other: R) -> R:
         x = self
         y = other
@@ -255,7 +261,7 @@ class R:
         mantissa = Mantissa(digits.n, digits.isPositif, digits.tab)
         (digits, cpt) = x.exponent.digits-y.exponent.digits
         exponent = Exponent(digits.n, digits.isPositif, digits.tab)
-        return R(mantissa, exponent).trim().cut(n)
+        return R(mantissa, exponent).trim().cut(mantissa.digits.n)
     def __abs__(self) -> R:
         x = self
         x.mantissa.digits.isPositif = True
@@ -266,7 +272,7 @@ class R:
             m = self.exponent.digits.n
             y_nm1 = self
             y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
-            while abs(y_n-y_nm1).mantissa>EPS(n,m).mantissa:
+            while abs(y_n-y_nm1)>EPS(n,m):
                 y_nm1 = y_n
                 y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
             return y_n
@@ -313,21 +319,21 @@ def FOUR(n: int, m: int) -> R:
 def EPS(n: int, m: int) -> R:
     return R(\
             Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
-            Exponent(m, False, [base-1]*m) \
+            Exponent(m, True, [0]*m) \
             )
 
 def PI(n: int,m: int) -> R:
     def lim() -> R:
         P_n = TWO(n,m)*FOUR(n,m)
         p_n = TWO(n,m).SQRT()*FOUR(n,m)
-        while abs(P_n-p_n).mantissa>EPS(n,m).mantissa:
+        while abs(P_n-p_n)>EPS(n,m):
             P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
             p_n = (p_n*P_n).SQRT()
         return p_n
     return lim()/TWO(n,m)
 
-n = 10
-m = 1
+n = 100
+m = 2
 print(n,m)
 print(TWO(n,m).SQRT())
 print(PI(n,m))
