@@ -338,5 +338,5 @@ def PI(n: int,m: int) -> R:
 n = 10
 m = 2
 print(n,m)
-print(TWO(n,m).SQRT())
-print(PI(n,m))
+print(TWO(n,m).SQRT(), flush=True)
+print(PI(n,m), flush=True)
