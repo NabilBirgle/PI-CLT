@@ -117,10 +117,6 @@ class Digits:
             while r>=p:
                 (r, cpt) = r-p
                 z.tab[i] += 1
-<<<<<<< HEAD
-=======
-#            p.rshift(0)
->>>>>>> 690e098 (v2)
             p.tab.insert(0,0)
             p.n+=1
             r.tab.append(0)
