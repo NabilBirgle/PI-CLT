@@ -285,11 +285,16 @@ def ONE(n: int, m: int) -> R:
             Exponent(m, True, [0]*m)\
             )
 
-def TWO(n: int, m: int) -> R:
-    return R(\
-            Mantissa(n, True, [(2 if i==0 else 0) for i in range(n)]),\
-            Exponent(m, True, [0]*m) \
-            )
+class Formula:
+    def app(n: int,m: int) -> R:
+        pass
+
+class TWO(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(\
+                Mantissa(n, True, [(2 if i==0 else 0) for i in range(n)]),\
+                Exponent(m, True, [0]*m) \
+                )
 
 def THREE(n: int, m: int) -> R:
     return R(\
@@ -309,30 +314,29 @@ def EPS(n: int, m: int) -> R:
             Exponent(m, True, [0]*m) \
             )
 
-def SQRT(y_0: R, n: int, m: int) -> R:
-    y_nm1 = y_0
-    y_n = (y_nm1 + (y_0/y_nm1)) / TWO(n,m)
-    while abs(y_n-y_nm1)>EPS(n,m):
-        y_nm1 = y_n
-        y_n = (y_nm1 + (y_0/y_nm1)) / TWO(n,m)
-    return y_n
-
-class Formula:
-    def app(n: int,m: int) -> R:
-        pass
+class SQRT:
+    def __init__(self, y_0: R):
+        self.y_0 = y_0
+    def app(self, n: int, m: int) -> R:
+        y_nm1 = self.y_0
+        y_n = (y_nm1 + (self.y_0/y_nm1)) / TWO().app(n,m)
+        while abs(y_n-y_nm1)>EPS(n,m):
+            y_nm1 = y_n
+            y_n = (y_nm1 + (self.y_0/y_nm1)) / TWO().app(n,m)
+        return y_n
 
 class PI(Formula):
-    def app(n: int,m: int) -> R:
-        P_n = TWO(n,m)*FOUR(n,m)
-        p_n = SQRT(TWO(n,m),n,m)*FOUR(n,m)
+    def app(self, n: int,m: int) -> R:
+        P_n = TWO().app(n,m)*FOUR(n,m)
+        p_n = SQRT(TWO().app(n,m)).app(n,m)*FOUR(n,m)
         while abs(P_n-p_n)>EPS(n,m):
-            P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
-            p_n = SQRT(p_n*P_n,n,m)
-        return p_n/TWO(n,m)
+            P_n = TWO().app(n,m)*(P_n*p_n)/(P_n+p_n)
+            p_n = SQRT(p_n*P_n).app(n,m)
+        return p_n/TWO().app(n,m)
 
 n = 10
 m = 2
 print(n,m)
-print(SQRT(TWO(n,m),n,m))
 
-print(PI.app(n,m))
+print(SQRT(TWO().app(n,m)).app(n,m))
+print(PI().app(n,m))
