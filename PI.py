@@ -262,20 +262,8 @@ class R:
         exponent = Exponent(digits.n, digits.isPositif, digits.tab)
         return R(mantissa, exponent).trim().cut(mantissa.digits.n)
     def __abs__(self) -> R:
-        x = self
-        x.mantissa.digits.isPositif = True
-        return x
-    def SQRT(self) -> R:
-        def lim() -> R:
-            n = self.mantissa.digits.n
-            m = self.exponent.digits.n
-            y_nm1 = self
-            y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
-            while abs(y_n-y_nm1)>EPS(n,m):
-                y_nm1 = y_n
-                y_n = (y_nm1 + (self/y_nm1)) / TWO(n,m)
-            return y_n
-        return lim()
+        mantissa = Mantissa(self.mantissa.digits.n, True, self.mantissa.digits.tab)
+        return R(mantissa, self.exponent)
 
 def normalize(self: R, other: R) -> (R, R):
     x = self.copy()
@@ -321,18 +309,30 @@ def EPS(n: int, m: int) -> R:
             Exponent(m, True, [0]*m) \
             )
 
-def PI(n: int,m: int) -> R:
-    def lim() -> R:
+def SQRT(y_0: R, n: int, m: int) -> R:
+    y_nm1 = y_0
+    y_n = (y_nm1 + (y_0/y_nm1)) / TWO(n,m)
+    while abs(y_n-y_nm1)>EPS(n,m):
+        y_nm1 = y_n
+        y_n = (y_nm1 + (y_0/y_nm1)) / TWO(n,m)
+    return y_n
+
+class Formula:
+    def app(n: int,m: int) -> R:
+        pass
+
+class PI(Formula):
+    def app(n: int,m: int) -> R:
         P_n = TWO(n,m)*FOUR(n,m)
-        p_n = TWO(n,m).SQRT()*FOUR(n,m)
+        p_n = SQRT(TWO(n,m),n,m)*FOUR(n,m)
         while abs(P_n-p_n)>EPS(n,m):
             P_n = TWO(n,m)*(P_n*p_n)/(P_n+p_n)
-            p_n = (p_n*P_n).SQRT()
-        return p_n
-    return lim()/TWO(n,m)
+            p_n = SQRT(p_n*P_n,n,m)
+        return p_n/TWO(n,m)
 
 n = 10
 m = 2
 print(n,m)
-print(TWO(n,m).SQRT(), flush=True)
-print(PI(n,m), flush=True)
+print(SQRT(TWO(n,m),n,m))
+
+print(PI.app(n,m))
