@@ -278,18 +278,20 @@ def normalize(self: R, other: R) -> (R, R):
         y.mantissa.rshift(0)
     return (x, y)
 
-def ZERO(n: int, m: int) -> R:
-    return R(Mantissa(n, True, [0]*n), Exponent(m, True, [0]*m))
-
-def ONE(n: int, m: int) -> R:
-    return R(\
-            Mantissa(n, True, [(1 if i==0 else 0) for i in range(n)]),\
-            Exponent(m, True, [0]*m)\
-            )
-
 class Formula:
     def app(n: int,m: int) -> R:
         pass
+
+class ZERO(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(Mantissa(n, True, [0]*n), Exponent(m, True, [0]*m))
+
+class ONE(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(\
+                Mantissa(n, True, [(1 if i==0 else 0) for i in range(n)]),\
+                Exponent(m, True, [0]*m)\
+                )
 
 class TWO(Formula):
     def app(self, n: int, m: int) -> R:
