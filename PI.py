@@ -194,6 +194,9 @@ class Exponent:
     def __lt__(self, other: Exponent) -> bool:
         return self.digits<other.digits
 
+class R:
+    pass
+
 class Formula:
     def app(n: int,m: int) -> R:
         pass
@@ -267,9 +270,17 @@ class R:
         (digits, cpt) = x.exponent.digits-y.exponent.digits
         exponent = Exponent(digits.n, digits.isPositif, digits.tab)
         return R(mantissa, exponent).trim().cut(mantissa.digits.n)
-    def __abs__(self) -> R:
-        mantissa = Mantissa(self.mantissa.digits.n, True, self.mantissa.digits.tab)
-        return R(mantissa, self.exponent)
+    def __abs__(self) -> Formula:
+        return ABS(self)
+
+class ABS(Formula):
+    def __init__(self, x: Formula):
+        self.x = x
+    def app(self, n: int, m: int) -> R:
+        x = self.x.app(n,m)
+        mantissa = Mantissa(x.mantissa.digits.n, True, x.mantissa.digits.tab)
+        return R(mantissa, x.exponent)
+
 
 def normalize(self: R, other: R) -> (R, R):
     x = self.copy()
@@ -327,7 +338,7 @@ class SQRT:
     def app(self, n: int, m: int) -> R:
         y_nm1 = self.y_0.app(n,m)
         y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
-        while abs(y_n-y_nm1)>EPS().app(n,m):
+        while ABS(y_n-y_nm1).app(n,m)>EPS().app(n,m):
             y_nm1 = y_n
             y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
         return y_n
@@ -336,7 +347,7 @@ class PI(Formula):
     def app(self, n: int,m: int) -> R:
         P_n = TWO().app(n,m)*FOUR().app(n,m)
         p_n = SQRT(TWO()).app(n,m)*FOUR().app(n,m)
-        while abs(P_n-p_n)>EPS().app(n,m):
+        while ABS(P_n-p_n).app(n,m)>EPS().app(n,m):
             P_n = TWO().app(n,m)*(P_n*p_n)/(P_n+p_n)
             p_n = SQRT(p_n*P_n).app(n,m)
         return p_n/TWO().app(n,m)
