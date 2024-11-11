@@ -12,14 +12,14 @@ class Digits:
         self.tab.pop()
     def __lt__(self, other: Digits) -> bool:
         if self.isPositif and other.isPositif:
-            for i in range(0,self.n):
+            for i in range(self.n):
                 if self.tab[i]<other.tab[i]:
                     return True
                 elif other.tab[i]<self.tab[i]:
                     return False
             return False
         elif (not self.isPositif) and (not other.isPositif):
-            for i in range(0,self.n):
+            for i in range(self.n):
                 if self.tab[i]<other.tab[i]:
                     return False
                 elif other.tab[i]<self.tab[i]:
@@ -31,14 +31,14 @@ class Digits:
             return True
     def __gt__(self, other: Digits) -> bool:
         if self.isPositif and other.isPositif:
-            for i in range(0,self.n):
+            for i in range(self.n):
                 if self.tab[i]>other.tab[i]:
                     return True
                 elif other.tab[i]>self.tab[i]:
                     return False
             return False
         elif (not self.isPositif) and (not other.isPositif):
-            for i in range(0,self.n):
+            for i in range(self.n):
                 if self.tab[i]>other.tab[i]:
                     return False
                 elif other.tab[i]>self.tab[i]:
@@ -106,14 +106,14 @@ class Digits:
                     self.isPositif==other.isPositif, \
                     [0]*(i+1) + other.tab + [0]*(self.n-i-1) \
                     )
-            for j in range(0,self.tab[i]):
+            for j in range(self.tab[i]):
                 (z, cpt) = z+a
         return (z, self.n+other.n)
     def __truediv__(self, other: Digits) -> Digits:
         r = Digits(self.n, True, self.tab.copy())
         p = Digits(other.n, True, other.tab.copy())
         z = Digits(self.n, self.isPositif==other.isPositif, [0]*self.n)
-        for i in range(0,self.n):
+        for i in range(self.n):
             while r>=p:
                 (r, cpt) = r-p
                 z.tab[i] += 1
@@ -264,6 +264,8 @@ class R:
     def __abs__(self) -> R:
         mantissa = Mantissa(self.mantissa.digits.n, True, self.mantissa.digits.tab)
         return R(mantissa, self.exponent)
+    def app(self, n: int, m: int) -> R:
+        return self
 
 def normalize(self: R, other: R) -> (R, R):
     x = self.copy()
@@ -302,34 +304,36 @@ def THREE(n: int, m: int) -> R:
             Exponent(m, True, [0]*m) \
             )
 
-def FOUR(n: int, m: int) -> R:
-    return R(\
-            Mantissa(n, True, [(4 if i==0 else 0) for i in range(n)]),\
-            Exponent(m, True, [0]*m) \
-            )
+class FOUR(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(\
+                Mantissa(n, True, [(4 if i==0 else 0) for i in range(n)]),\
+                Exponent(m, True, [0]*m) \
+                )
 
-def EPS(n: int, m: int) -> R:
-    return R(\
-            Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
-            Exponent(m, True, [0]*m) \
-            )
+class EPS(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(\
+                Mantissa(n, True, [(0 if not i==n-1 else 1) for i in range(n)]),\
+                Exponent(m, True, [0]*m) \
+                )
 
 class SQRT:
-    def __init__(self, y_0: R):
+    def __init__(self, y_0: Formula):
         self.y_0 = y_0
     def app(self, n: int, m: int) -> R:
-        y_nm1 = self.y_0
-        y_n = (y_nm1 + (self.y_0/y_nm1)) / TWO().app(n,m)
-        while abs(y_n-y_nm1)>EPS(n,m):
+        y_nm1 = self.y_0.app(n,m)
+        y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
+        while abs(y_n-y_nm1)>EPS().app(n,m):
             y_nm1 = y_n
-            y_n = (y_nm1 + (self.y_0/y_nm1)) / TWO().app(n,m)
+            y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
         return y_n
 
 class PI(Formula):
     def app(self, n: int,m: int) -> R:
-        P_n = TWO().app(n,m)*FOUR(n,m)
-        p_n = SQRT(TWO().app(n,m)).app(n,m)*FOUR(n,m)
-        while abs(P_n-p_n)>EPS(n,m):
+        P_n = TWO().app(n,m)*FOUR().app(n,m)
+        p_n = SQRT(TWO()).app(n,m)*FOUR().app(n,m)
+        while abs(P_n-p_n)>EPS().app(n,m):
             P_n = TWO().app(n,m)*(P_n*p_n)/(P_n+p_n)
             p_n = SQRT(p_n*P_n).app(n,m)
         return p_n/TWO().app(n,m)
@@ -338,5 +342,5 @@ n = 10
 m = 2
 print(n,m)
 
-print(SQRT(TWO().app(n,m)).app(n,m))
+print(SQRT(TWO()).app(n,m))
 print(PI().app(n,m))
