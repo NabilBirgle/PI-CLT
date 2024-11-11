@@ -298,11 +298,12 @@ class TWO(Formula):
                 Exponent(m, True, [0]*m) \
                 )
 
-def THREE(n: int, m: int) -> R:
-    return R(\
-            Mantissa(n, True, [(3 if i==0 else 0) for i in range(n)]),\
-            Exponent(m, True, [0]*m) \
-            )
+def THREE(Formula):
+    def app(self, n: int, m: int) -> R:
+        return R(\
+                Mantissa(n, True, [(3 if i==0 else 0) for i in range(n)]),\
+                Exponent(m, True, [0]*m) \
+                )
 
 class FOUR(Formula):
     def app(self, n: int, m: int) -> R:
