@@ -194,6 +194,10 @@ class Exponent:
     def __lt__(self, other: Exponent) -> bool:
         return self.digits<other.digits
 
+class Formula:
+    def app(n: int,m: int) -> R:
+        pass
+
 class R:
     pass
 class R:
@@ -224,6 +228,8 @@ class R:
         self.mantissa.digits.tab = self.mantissa.digits.tab[0:n] \
                 + [0]*(n-self.mantissa.digits.n)
         self.mantissa.digits.n = n
+        return self
+    def app(self, n: int, m: int) -> R:
         return self
     def __add__(self, other: R) -> R:
         (x, y) = normalize(self, other)
@@ -264,8 +270,6 @@ class R:
     def __abs__(self) -> R:
         mantissa = Mantissa(self.mantissa.digits.n, True, self.mantissa.digits.tab)
         return R(mantissa, self.exponent)
-    def app(self, n: int, m: int) -> R:
-        return self
 
 def normalize(self: R, other: R) -> (R, R):
     x = self.copy()
@@ -277,10 +281,6 @@ def normalize(self: R, other: R) -> (R, R):
         y.exponent.increase()
         y.mantissa.rshift(0)
     return (x, y)
-
-class Formula:
-    def app(n: int,m: int) -> R:
-        pass
 
 class ZERO(Formula):
     def app(self, n: int, m: int) -> R:
