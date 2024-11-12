@@ -336,11 +336,12 @@ class SQRT:
     def __init__(self, y_0: Formula):
         self.y_0 = y_0
     def app(self, n: int, m: int) -> R:
-        y_nm1 = self.y_0.app(n,m)
-        y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
+        y_0 = self.y_0.app(n,m)
+        y_nm1 = y_0
+        y_n = (y_nm1 + (y_0/y_nm1)) / TWO().app(n,m)
         while ABS(y_n-y_nm1).app(n,m)>EPS().app(n,m):
             y_nm1 = y_n
-            y_n = (y_nm1 + (self.y_0.app(n,m)/y_nm1)) / TWO().app(n,m)
+            y_n = (y_nm1 + y_0/y_nm1) / TWO().app(n,m)
         return y_n
 
 class PI(Formula):
