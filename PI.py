@@ -368,7 +368,7 @@ class SQRT(Formula):
         y_0 = self.y_0.app(n,m)
         y_nm1 = y_0
         y_n = ( (y_nm1 + y_0/y_nm1) / TWO() ).app(n,m)
-        while ABS(y_n-y_nm1).app(n,m)>EPS().app(n,m):
+        while abs(y_n-y_nm1).app(n,m)>EPS().app(n,m):
             y_nm1 = y_n
             y_n = ( (y_nm1 + y_0/y_nm1) / TWO() ).app(n,m)
         return y_n
@@ -377,7 +377,7 @@ class PI(Formula):
     def app(self, n: int,m: int) -> R:
         P_n = ( TWO()*FOUR() ).app(n,m)
         p_n = ( SQRT(TWO())*FOUR() ).app(n,m)
-        while ABS(P_n-p_n).app(n,m)>EPS().app(n,m):
+        while abs(P_n-p_n).app(n,m)>EPS().app(n,m):
             P_n = ( TWO()*(P_n*p_n)/(P_n+p_n) ).app(n,m)
             p_n = ( SQRT(p_n*P_n) ).app(n,m)
         return ( p_n/TWO() ).app(n,m)
